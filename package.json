@@ -19,9 +19,9 @@
     "realtime",
     "geolocation"
   ],
-  "main": "src/geoFire.js",
+  "main": "dist/geofire.js",
   "files": [
-    "src/**",
+    "dist/**",
     "LICENSE",
     "README.md",
     "package.json"
