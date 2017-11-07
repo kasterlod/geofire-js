@@ -28,12 +28,18 @@ var GeoFire = function(firebaseRef) {
    * @param {Array.<number>|undefined} location The [latitude, longitude] pair to add.
    * @return {Promise.<>} A promise that is fulfilled when the write is complete.
    */
-  this.set = function(keyOrLocations, location) {
+  this.set = function(keyOrLocations, location, customData) {
     var locations;
     if (typeof keyOrLocations === "string" && keyOrLocations.length !== 0) {
+      if(customData && typeof customData !== "object"){
+        throw new Error("customData must be a Object.");
+      }
       // If this is a set for a single location, convert it into a object
       locations = {};
       locations[keyOrLocations] = location;
+      if (location && customData) {
+        locations[keyOrLocations].push(customData);
+      }
     } else if (typeof keyOrLocations === "object") {
       if (typeof location !== "undefined") {
         throw new Error("The location argument should not be used if you pass an object to set().");
@@ -53,10 +59,23 @@ var GeoFire = function(firebaseRef) {
         // Setting location to null is valid since it will remove the key
         newData[key] = null;
       } else {
+        var customData = null;
+        if(location && location.length >= 3){
+          customData = location.pop();
+        }
         validateLocation(location);
 
         var geohash = encodeGeohash(location);
         newData[key] = encodeGeoFireObject(location, geohash);
+
+        if(customData){
+          var cdKeys = Object.keys(customData);
+          var cdKey = null;
+          for(var i = 0, iMax = cdKeys.length; i < iMax; i++){
+            cdKey = cdKeys[i];
+            newData[key][cdKey] = customData[cdKey];
+          }
+        }
       }
     });
 
@@ -78,7 +97,14 @@ var GeoFire = function(firebaseRef) {
       if (snapshotVal === null) {
         return null;
       } else {
-        return decodeGeoFireObject(snapshotVal);
+        var decodedGeoFireObject = decodeGeoFireObject(snapshotVal);
+        if(decodedGeoFireObject){
+          var customData = getCustomData(dataSnapshot);
+          if(customData){
+            decodedGeoFireObject.push(customData);
+          }
+        }
+        return decodedGeoFireObject;
       }
     });
   };
