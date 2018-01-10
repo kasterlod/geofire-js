@@ -812,9 +812,9 @@ var GeoQuery = function (firebaseRef, queryCriteria) {
     for (i = 0; i < numKeys; ++i) {
       var key = keys[i];
       if (!_geohashInSomeQuery(_locationsTracked[key].geohash)) {
-        if (_locationsTracked[key].isInQuery) {
-          throw new Error("Internal State error, trying to remove location that is still in query");
-        }
+        // if (_locationsTracked[key].isInQuery) { - temporarly commented
+        //  throw new Error("Internal State error, trying to remove location that is still in query");
+        // }
         delete _locationsTracked[key];
       }
     }
